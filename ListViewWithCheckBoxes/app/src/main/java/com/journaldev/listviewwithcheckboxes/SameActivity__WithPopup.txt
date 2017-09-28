@@ -1,0 +1,89 @@
+/*
+
+	if you want to open popup on same Activity then call this method from activity
+
+*/
+
+
+    PopupWindow pwindo;
+    String totlaItem = "";
+    ArrayList<DataModel> dataModels2;
+    ListView listView2;
+    Button btn_Done, btn_cancel;
+    public  static CustomAdapter adapter2;
+
+public String openPopupOperator(View v ,   final EditText editCurrentView)
+    {
+        totlaItem = "";
+        try
+        {
+            LayoutInflater inflater = (LayoutInflater) Traceability_Data.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View layout = inflater.inflate(R.layout.spiner_mult_choice_activity,(ViewGroup) findViewById(R.id.rlcordinator));
+            pwindo = new PopupWindow(layout, 400, 500, true);
+            pwindo.showAtLocation(v, Gravity.CENTER, 0, 0);
+
+            listView2 = (ListView) layout.findViewById(R.id.listView);
+            btn_Done = (Button) layout.findViewById(R.id.btn_Done);
+            btn_cancel = (Button) layout.findViewById(R.id.btn_calcel);
+
+            dataModels2 = new ArrayList<>();
+            String[] selectedData=null;
+            if(!editCurrentView.getText().toString().isEmpty()) {
+                 selectedData = editCurrentView.getText().toString().split(",");
+            }
+            for (int i = 0; i < nl.getLength(); i++)
+            {
+                Element e = (Element) nl.item(i);
+                boolean status = false;
+                if(!editCurrentView.getText().toString().isEmpty()) {
+                for(int k =0 ; k<selectedData.length;k++)
+                {
+                        String seID = selectedData[k].trim();
+                        if (seID.equalsIgnoreCase(xmlParser.getValue(e, "OpId"))) {
+                            status = true;
+                        }
+                    }
+                }
+
+                dataModels2.add(new DataModel( xmlParser.getValue(e, "OpId"),xmlParser.getValue(e, "OpName"), status));
+            }
+
+            adapter2 = new CustomAdapter(dataModels2, getApplicationContext());
+            listView2.setAdapter(adapter2);
+
+            btn_Done.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view)
+                {
+                    for (int i = 0 ; i<dataModels2.size() ; i++ )
+                    {
+                        DataModel dataModel= dataModels2.get(i);
+                        if(dataModel.checked)
+                        {
+                            if(totlaItem.isEmpty())
+                            {
+                                totlaItem = dataModel.OptID;
+                            }
+                            else
+                            {
+                                totlaItem = totlaItem+", " +dataModel.OptID;
+                            }
+                        }
+                    }
+                    editCurrentView.setText(totlaItem);
+                    pwindo.dismiss();
+                }
+            });
+            btn_cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    pwindo.dismiss();
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return totlaItem;
+    }
